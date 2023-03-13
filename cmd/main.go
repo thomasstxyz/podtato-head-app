@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/podtato-head/podtato-head-app/pkg/podtatoserver"
+	"github.com/pterm/pterm"
 	urcli "github.com/urfave/cli/v3"
 	"log"
 	"os"
@@ -41,5 +42,7 @@ func main() {
 }
 
 func execute() {
+	s, _ := pterm.DefaultBigText.WithLetters(pterm.NewLettersFromString("podtato-head")).Srender()
+	pterm.DefaultCenter.Println(s)
 	podtatoserver.Run(c.Component, c.Port)
 }

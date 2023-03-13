@@ -9,6 +9,7 @@ import (
 	"github.com/podtato-head/podtato-head-app/pkg/services"
 	"github.com/podtato-head/podtato-head-app/pkg/version"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/pterm/pterm"
 	"html/template"
 	"log"
 	"net/http"
@@ -54,7 +55,9 @@ func Run(component string, port string) {
 
 		router.Path(fmt.Sprintf("%s/{partName}/{imagePath}", externalServicesPrefix)).
 			HandlerFunc(services.HandleLocalService)
-		router.Path(fmt.Sprintf("/images/%s/{imageName}", component)).HandlerFunc(handlers.PartHandler)
+		router.Path(fmt.Sprintf("/images/{partName}/{imageName}")).HandlerFunc(handlers.PartHandler)
+
+		pterm.DefaultCenter.Println("Listening on port " + port + " in monolith mode")
 
 	case "entry":
 		router.PathPrefix(assetsPrefix).
@@ -72,6 +75,8 @@ func Run(component string, port string) {
 			HandlerFunc(services.HandleExternalService)
 
 		router.Path(fmt.Sprintf("/images/%s/{imageName}", component)).HandlerFunc(handlers.PartHandler)
+
+		pterm.DefaultCenter.Println("Listening on port " + port + " for " + component + " service")
 	}
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), router); err != nil {

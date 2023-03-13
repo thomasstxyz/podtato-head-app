@@ -27,7 +27,7 @@ func HandleLocalService(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// call dependency service and get response
-	response, err := http.Get(fmt.Sprintf("%s/images/%s", rootURL, imagePath))
+	response, err := http.Get(fmt.Sprintf("%s/images/%s/%s", rootURL, service, imagePath))
 	if err != nil {
 		log.Printf("failed to reach dependency service: %v", err)
 		http.Error(w, err.Error(), http.StatusFailedDependency)
