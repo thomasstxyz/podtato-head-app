@@ -1,0 +1,32 @@
+name: Run Release Please
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  # Default minimum version of Go to support.
+  DEFAULT_GO_VERSION: 1.19
+  REGISTRY: ghcr.io
+  IMAGE_NAME: podtato-server
+  GITHUB_PAGES_BRANCH: gh-pages
+
+permissions:
+  contents: read
+
+jobs:
+  release-please:
+    permissions:
+      contents: write  # for google-github-actions/release-please-action to create release commit
+      pull-requests: write  # for google-github-actions/release-please-action to create release PR
+    runs-on: ubuntu-latest
+
+    # Release-please creates a PR that tracks all changes
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          command: manifest
+          token: ${{secrets.GITHUB_TOKEN}}
+          default-branch: main
