@@ -13,6 +13,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
+	"time"
 )
 
 var serviceMap = map[string]string{
@@ -27,18 +29,39 @@ const (
 	externalServicesPrefix = "/parts"
 )
 
+type TemplateData struct {
+	Version  string
+	Hostname string
+	Daytime  string
+}
+
 func serveMain(w http.ResponseWriter, r *http.Request) {
 	homeTemplate, err := template.ParseFS(assets.Assets, "html/podtato-home.html")
 	if err != nil {
 		log.Fatalf("failed to parse file: %v", err)
 	}
 
-	err = homeTemplate.Execute(w, version.ServiceVersion())
+	hostname, err := os.Hostname()
+	if err != nil {
+		log.Fatalf("failed to get hostname: %v", err)
+	}
+
+	err = homeTemplate.Execute(w, TemplateData{Version: version.ServiceVersion(), Hostname: hostname, Daytime: getDayTime()})
 	if err != nil {
 		log.Fatalf("failed to execute template: %v", err)
 	}
 }
 
+func getDayTime() string {
+	hour := time.Now().Hour()
+	if hour < 12 {
+		return "morning"
+	} else if hour < 18 {
+		return "afternoon"
+	} else {
+		return "evening"
+	}
+}
 func Run(component string, port string) {
 	router := mux.NewRouter()
 

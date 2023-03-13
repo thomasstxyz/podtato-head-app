@@ -4,7 +4,7 @@ html,
 }
 body {
   height: 100%;
-  background-image: linear-gradient(180deg, yellow, red);
+  background-image: linear-gradient(180deg, darkblue, blue);
   font-family: Clarity City,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Roboto,Ubuntu,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;
 }
 div {
