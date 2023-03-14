@@ -25,18 +25,15 @@ const (
 )
 
 type PodTatoServer struct {
-	Component string
-	Port      string
-}
-
-type FrontEndComponents struct {
+	Component    string
+	Port         string
+	StartUpDelay string
 }
 
 type TemplateData struct {
 	Version         string
 	Hostname        string
 	Daytime         string
-	Components      FrontEndComponents
 	LeftArm         string
 	LeftArmVersion  string
 	RightArm        string
@@ -109,7 +106,7 @@ func (p PodTatoServer) Serve() error {
 
 		router.Path("/images/{partName}/{partName}").HandlerFunc(handlers.PartHandler)
 
-		pterm.DefaultCenter.Println("Listening on port " + p.Port + " in monolith mode")
+		pterm.DefaultCenter.Println("Will listen on port " + p.Port + " in monolith mode")
 
 	case "frontend":
 		router.Path("/").HandlerFunc(p.frontendHandler)
@@ -118,7 +115,7 @@ func (p PodTatoServer) Serve() error {
 		router.PathPrefix(assetsPrefix).
 			Handler(http.StripPrefix(assetsPrefix, http.FileServer(http.FS(assets.Assets))))
 
-		pterm.DefaultCenter.Println("Listening on port " + p.Port + " in frontend mode")
+		pterm.DefaultCenter.Println("Will listen on port " + p.Port + " in frontend mode")
 
 	default:
 		router.PathPrefix(assetsPrefix).
@@ -127,7 +124,16 @@ func (p PodTatoServer) Serve() error {
 		fmt.Println(p.Component)
 		router.Path(fmt.Sprintf("/images/%s/{partName}", p.Component)).HandlerFunc(handlers.PartHandler)
 
-		pterm.DefaultCenter.Println("Listening on port " + p.Port + " for " + p.Component + " service")
+		pterm.DefaultCenter.Println("Will listen on port " + p.Port + " for " + p.Component + " service")
+	}
+
+	// Delay startup
+	if p.StartUpDelay != "" {
+		delay, err := time.ParseDuration(p.StartUpDelay)
+		if err != nil {
+			return err
+		}
+		time.Sleep(delay)
 	}
 
 	go func() {

@@ -27,6 +27,12 @@ func main() {
 				EnvVars:     []string{"PODTATO_PORT"},
 				Destination: &p.Port,
 			},
+			&urcli.StringFlag{
+				Name:        "delay",
+				Value:       "0s",
+				EnvVars:     []string{"PODTATO_STARTUP_DELAY"},
+				Destination: &p.StartUpDelay,
+			},
 		},
 		Action: func(*urcli.Context) error {
 			execute()
