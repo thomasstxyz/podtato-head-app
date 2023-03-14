@@ -7,7 +7,6 @@
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true,
       "draft": false,
-      "tagFormat": "${version}",
       "extra-files": [
         "README.md",
         "deploy/manifest.yaml",
