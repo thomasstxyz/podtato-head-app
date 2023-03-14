@@ -21,7 +21,6 @@ type PartResponse struct {
 
 func PartHandler(w http.ResponseWriter, r *http.Request) {
 	partName, found := mux.Vars(r)["partName"]
-	fmt.Println(partName)
 	if !found {
 		// shouldn't happen...
 		http.Error(w, fmt.Sprintf("part name %s not found in URL", partName), http.StatusNotFound)

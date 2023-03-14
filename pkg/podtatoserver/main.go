@@ -121,7 +121,6 @@ func (p PodTatoServer) Serve() error {
 		router.PathPrefix(assetsPrefix).
 			Handler(http.StripPrefix(assetsPrefix, http.FileServer(http.FS(assets.Assets))))
 
-		fmt.Println(p.Component)
 		router.Path(fmt.Sprintf("/images/%s/{partName}", p.Component)).HandlerFunc(handlers.PartHandler)
 
 		pterm.DefaultCenter.Println("Will listen on port " + p.Port + " for " + p.Component + " service")
@@ -167,7 +166,6 @@ func (p PodTatoServer) fetchImage(component string) string {
 			return ""
 		}
 	}
-	fmt.Println(serviceDiscoverer)
 	rootURL, err := serviceDiscoverer.GetServiceAddress(component)
 	if err != nil {
 		log.Printf("failed to discover address for service %s", component)
