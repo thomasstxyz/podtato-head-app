@@ -95,13 +95,13 @@ func NewStaticServiceDiscoverer() (*staticServiceDiscoverer, error) {
 	return &staticServiceDiscoverer{serviceMap}, nil
 }
 
-func NewLocalServiceDiscoverer() (*staticServiceDiscoverer, error) {
+func NewLocalServiceDiscoverer(port string) (*staticServiceDiscoverer, error) {
 	serviceMap, err := NewServiceMap(map[string]string{
-		"hat":       "http://localhost:8080",
-		"left-leg":  "http://localhost:8080",
-		"left-arm":  "http://localhost:8080",
-		"right-leg": "http://localhost:8080",
-		"right-arm": "http://localhost:8080",
+		"hat":       "http://localhost:" + port,
+		"left-leg":  "http://localhost:" + port,
+		"left-arm":  "http://localhost:" + port,
+		"right-leg": "http://localhost:" + port,
+		"right-arm": "http://localhost:" + port,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert strings to URLs for map: %w", err)

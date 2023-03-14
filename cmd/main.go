@@ -8,12 +8,7 @@ import (
 	"os"
 )
 
-type config struct {
-	Component string `json:"component"`
-	Port      string `json:"port"`
-}
-
-var c config
+var p podtatoserver.PodTatoServer
 
 func main() {
 	app := &urcli.App{
@@ -23,12 +18,14 @@ func main() {
 				Name:        "component",
 				Value:       "all",
 				Usage:       "all, leftArm, rightArm, leftLeg, rightLeg",
-				Destination: &c.Component,
+				EnvVars:     []string{"PODTATO_COMPONENT"},
+				Destination: &p.Component,
 			},
 			&urcli.StringFlag{
 				Name:        "port",
 				Value:       "8080",
-				Destination: &c.Port,
+				EnvVars:     []string{"PODTATO_PORT"},
+				Destination: &p.Port,
 			},
 		},
 		Action: func(*urcli.Context) error {
@@ -44,5 +41,9 @@ func main() {
 func execute() {
 	s, _ := pterm.DefaultBigText.WithLetters(pterm.NewLettersFromString("podtato-head")).Srender()
 	pterm.DefaultCenter.Println(s)
-	podtatoserver.Run(c.Component, c.Port)
+
+	err := p.Serve()
+	if err != nil {
+		log.Fatal(err)
+	}
 }

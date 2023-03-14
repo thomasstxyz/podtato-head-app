@@ -1,6 +1,7 @@
 package podtatoserver
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/podtato-head/podtato-head-app/pkg/assets"
@@ -11,31 +12,44 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/pterm/pterm"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"time"
 )
 
-var serviceMap = map[string]string{
-	"leftArm":  "http://podtato-left-arm:8080",
-	"rightArm": "http://podtato-right-arm:8080",
-	"leftLeg":  "http://podtato-left-leg:8080",
-	"rightLeg": "http://podtato-right-leg:8080",
-}
-
 const (
-	assetsPrefix           = "/assets"
-	externalServicesPrefix = "/parts"
+	assetsPrefix = "/assets"
 )
 
-type TemplateData struct {
-	Version  string
-	Hostname string
-	Daytime  string
+type PodTatoServer struct {
+	Component string
+	Port      string
 }
 
-func serveMain(w http.ResponseWriter, r *http.Request) {
+type FrontEndComponents struct {
+}
+
+type TemplateData struct {
+	Version         string
+	Hostname        string
+	Daytime         string
+	Components      FrontEndComponents
+	LeftArm         string
+	LeftArmVersion  string
+	RightArm        string
+	RightArmVersion string
+	LeftLeg         string
+	LeftLegVersion  string
+	RightLeg        string
+	RightLegVersion string
+	Hat             string
+	HatVersion      string
+}
+
+func (p PodTatoServer) frontendHandler(w http.ResponseWriter, r *http.Request) {
+
 	homeTemplate, err := template.ParseFS(assets.Assets, "html/podtato-home.html")
 	if err != nil {
 		log.Fatalf("failed to parse file: %v", err)
@@ -46,7 +60,18 @@ func serveMain(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to get hostname: %v", err)
 	}
 
-	err = homeTemplate.Execute(w, TemplateData{Version: version.ServiceVersion(), Hostname: hostname, Daytime: getDayTime()})
+	tpl := TemplateData{
+		LeftArm:  p.fetchImage("left-arm"),
+		RightArm: p.fetchImage("right-arm"),
+		LeftLeg:  p.fetchImage("left-leg"),
+		RightLeg: p.fetchImage("right-leg"),
+		Hat:      p.fetchImage("hat"),
+		Hostname: hostname,
+		Daytime:  getDayTime(),
+		Version:  version.ServiceVersion(),
+	}
+
+	err = homeTemplate.Execute(w, tpl)
 	if err != nil {
 		log.Fatalf("failed to execute template: %v", err)
 	}
@@ -62,49 +87,93 @@ func getDayTime() string {
 		return "evening"
 	}
 }
-func Run(component string, port string) {
-	router := mux.NewRouter()
 
+func (p PodTatoServer) Serve() error {
+	// Add metrics
+	router := mux.NewRouter()
 	router.Use(metrics.MetricsHandler)
 	router.Path("/metrics").Handler(promhttp.Handler())
 
-	switch component {
+	switch p.Component {
 	case "all":
-		router.Path("/").HandlerFunc(serveMain)
+		router.Path("/").HandlerFunc(p.frontendHandler)
 
 		// serve CSS and images
 		router.PathPrefix(assetsPrefix).
 			Handler(http.StripPrefix(assetsPrefix, http.FileServer(http.FS(assets.Assets))))
 
-		router.Path(fmt.Sprintf("%s/{partName}/{imagePath}", externalServicesPrefix)).
-			HandlerFunc(services.HandleLocalService)
-		router.Path(fmt.Sprintf("/images/{partName}/{imageName}")).HandlerFunc(handlers.PartHandler)
+		router.Path("/images/{partName}/{partName}").HandlerFunc(handlers.PartHandler)
 
-		pterm.DefaultCenter.Println("Listening on port " + port + " in monolith mode")
+		pterm.DefaultCenter.Println("Listening on port " + p.Port + " in monolith mode")
 
-	case "entry":
+	case "frontend":
+		router.Path("/").HandlerFunc(p.frontendHandler)
+
+		// serve CSS and images
 		router.PathPrefix(assetsPrefix).
 			Handler(http.StripPrefix(assetsPrefix, http.FileServer(http.FS(assets.Assets))))
 
-		router.Path("/").HandlerFunc(serveMain)
-		router.Path(fmt.Sprintf("%s/{partName}/{imagePath}", externalServicesPrefix)).
-			HandlerFunc(services.HandleExternalService)
+		pterm.DefaultCenter.Println("Listening on port " + p.Port + " in frontend mode")
 
 	default:
 		router.PathPrefix(assetsPrefix).
 			Handler(http.StripPrefix(assetsPrefix, http.FileServer(http.FS(assets.Assets))))
 
-		router.Path(fmt.Sprintf("%s/%s/{imagePath}", externalServicesPrefix, component)).
-			HandlerFunc(services.HandleExternalService)
+		fmt.Println(p.Component)
+		router.Path(fmt.Sprintf("/images/%s/{partName}", p.Component)).HandlerFunc(handlers.PartHandler)
 
-		router.Path(fmt.Sprintf("/images/%s/{imageName}", component)).HandlerFunc(handlers.PartHandler)
-
-		pterm.DefaultCenter.Println("Listening on port " + port + " for " + component + " service")
+		pterm.DefaultCenter.Println("Listening on port " + p.Port + " for " + p.Component + " service")
 	}
 
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), router); err != nil {
-		log.Fatal(err)
+	// Start server
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", p.Port), router); err != nil {
+		return err
 	}
-	log.Printf("exiting gracefully")
+	return nil
+}
 
+func (p PodTatoServer) fetchImage(component string) string {
+	var serviceDiscoverer services.ServiceMap
+	var err error
+	if p.Component == "all" {
+		serviceDiscoverer, err = services.NewLocalServiceDiscoverer(p.Port)
+		if err != nil {
+			log.Printf("failed to get service discoverer: %v", err)
+			return ""
+
+		}
+	} else {
+		serviceDiscoverer, err = services.ProvideServiceDiscoverer()
+		if err != nil {
+			log.Printf("failed to get service discoverer: %v", err)
+			return ""
+		}
+	}
+	fmt.Println(serviceDiscoverer)
+	rootURL, err := serviceDiscoverer.GetServiceAddress(component)
+	if err != nil {
+		log.Printf("failed to discover address for service %s", component)
+		return ""
+	}
+
+	response, err := http.Get(fmt.Sprintf("%s/images/%s/%s", rootURL, component, component))
+	if err != nil {
+		log.Printf("failed to reach dependency service: %v", err)
+		return ""
+	}
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		log.Printf("failed to read body of dependency service response: %v", err)
+		return ""
+	}
+	defer response.Body.Close()
+
+	part := handlers.PartResponse{}
+	err = json.Unmarshal(body, &part)
+	if err != nil {
+		log.Printf("failed to unmarshal body of dependency service response: %v", err)
+		return ""
+	}
+	return part.Image
 }
