@@ -1,0 +1,16 @@
+{{ $componentName := "service-discovery" }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-%s" (include "podtato-head.fullname" .) $componentName }}
+  labels:
+    {{- include "podtato-head.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ printf "%s-%s" (include "podtato-head.fullname" .) $componentName }}
+data:
+    servicesConfig.yaml: |
+        hat:       "{{ printf "http://%s-%s:%v" (include "podtato-head.fullname" .) "hat" .Values.hat.servicePort }}"
+        left-leg:  "{{ printf "http://%s-%s:%v" (include "podtato-head.fullname" .) "left-leg" .Values.leftLeg.servicePort }}"
+        left-arm:  "{{ printf "http://%s-%s:%v" (include "podtato-head.fullname" .) "left-arm" .Values.leftArm.servicePort }}"
+        right-leg: "{{ printf "http://%s-%s:%v" (include "podtato-head.fullname" .) "right-leg" .Values.rightLeg.servicePort }}"
+        right-arm: "{{ printf "http://%s-%s:%v" (include "podtato-head.fullname" .) "right-arm" .Values.rightArm.servicePort }}"
