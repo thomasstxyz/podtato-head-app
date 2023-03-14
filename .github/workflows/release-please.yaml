@@ -84,10 +84,17 @@ jobs:
           cache-from: type=gha,scope=${{ github.ref_name }}-${{ env.IMAGE_NAME }}
           cache-to: type=gha,scope=${{ github.ref_name }}-${{ env.IMAGE_NAME }}
 
+      - name: Write vars
+        id: vars
+        shell: bash
+        run: |
+          TAG=${{ needs.release-please.outputs.tag_name }}
+          echo "version=${TAG#v}" >> $GITHUB_OUTPUT
+
       - name: Publish Helm chart to GHCR
         run: |
-           helm package chart --version ${{ needs.release-please.outputs.tag_name }}
-           helm push podtato-head-${{ needs.release-please.outputs.tag_name }}.tgz oci://ghcr.io/podtato-head/charts
+           helm package chart --version
+           helm push podtato-head-${{ steps.vars.outputs.version }}.tgz oci://ghcr.io/podtato-head/charts
 
       - name: Generate SBOM
         uses: anchore/sbom-action@v0.13.3
