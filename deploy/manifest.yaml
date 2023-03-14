@@ -44,11 +44,11 @@ spec:
             protocol: TCP
         livenessProbe:
           httpGet:
-            path: /
+            path: /healthz
             port: http
         readinessProbe:
           httpGet:
-            path: /
+            path: /readyz
             port: http
         volumeMounts:
           - name: service-discovery-map
@@ -96,11 +96,11 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
+              path: /healthz
               port: http
           readinessProbe:
             httpGet:
-              path: /
+              path: /readyz
               port: http
               
 ---
@@ -141,11 +141,11 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
+              path: /healthz
               port: http
           readinessProbe:
             httpGet:
-              path: /
+              path: /readyz
               port: http
 
 ---
@@ -186,11 +186,11 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
+              path: /healthz
               port: http
           readinessProbe:
             httpGet:
-              path: /
+              path: /readyz
               port: http
 
 ---
@@ -276,11 +276,11 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
+              path: /healthz
               port: http
           readinessProbe:
             httpGet:
-              path: /
+              path: /readyz
               port: http
 
 ---
