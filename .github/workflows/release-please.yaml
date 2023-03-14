@@ -44,7 +44,7 @@ jobs:
       packages: write
       id-token: write
     env:
-      IMAGE_TAG: ghcr.io/podtato-head/${{ env.IMAGE_NAME }}:${{ needs.release-please.outputs.tag_name }}
+      IMAGE_TAG: ghcr.io/podtato-head/podtato-server:${{ needs.release-please.outputs.tag_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -105,7 +105,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3 
+        uses: actions/checkout@v3
       - name: Attach release assets
         uses: softprops/action-gh-release@v1
         with:
