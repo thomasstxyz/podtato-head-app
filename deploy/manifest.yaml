@@ -231,11 +231,11 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
+              path: /healthz
               port: http
           readinessProbe:
             httpGet:
-              path: /
+              path: /readyz
               port: http
 
 ---
@@ -377,6 +377,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: podtato-head-discovery
+  namespace: podtato-kubectl
 data:
   servicesConfig.yaml: |
     hat:       "http://podtato-head-hat:8080"
