@@ -1,0 +1,6 @@
+bases:
+  - manifest.yaml
+
+images:
+  - name: ghcr.io/podtato-head/podtato-server
+    newTag: dev-202303141011 
