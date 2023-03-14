@@ -24,7 +24,9 @@ jobs:
       contents: write  # for google-github-actions/release-please-action to create release commit
       pull-requests: write  # for google-github-actions/release-please-action to create release PR
     runs-on: ubuntu-latest
-
+    outputs:
+      releases_created: ${{ steps.release.outputs.releases_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     # Release-please creates a PR that tracks all changes
     steps:
       - name: Checkout
