@@ -86,7 +86,7 @@ jobs:
 
       - name: Publish Helm chart to GHCR
         run: |
-           helm package chart
+           helm package chart --version ${{ needs.release-please.outputs.tag_name }}
            helm push podtato-head-${{ needs.release-please.outputs.tag_name }}.tgz oci://ghcr.io/podtato-head/charts
 
       - name: Generate SBOM
