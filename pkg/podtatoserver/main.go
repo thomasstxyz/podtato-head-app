@@ -16,6 +16,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync/atomic"
 	"time"
 )
 
@@ -90,9 +91,13 @@ func getDayTime() string {
 
 func (p PodTatoServer) Serve() error {
 	// Add metrics
+	isReady := &atomic.Value{}
+	isReady.Store(false)
+
 	router := mux.NewRouter()
 	router.Use(metrics.MetricsHandler)
 	router.Path("/metrics").Handler(promhttp.Handler())
+	router.Path("/healthz").HandlerFunc(handlers.HealthHandler)
 
 	switch p.Component {
 	case "all":
@@ -124,6 +129,13 @@ func (p PodTatoServer) Serve() error {
 
 		pterm.DefaultCenter.Println("Listening on port " + p.Port + " for " + p.Component + " service")
 	}
+
+	go func() {
+		isReady.Store(true)
+		pterm.DefaultCenter.Println("PodTatoHead is ready")
+	}()
+
+	router.Path("/readyz").HandlerFunc(handlers.ReadinessHandler(isReady))
 
 	// Start server
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", p.Port), router); err != nil {
