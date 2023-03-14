@@ -10,7 +10,9 @@
       "draft": false,
       "extra-files": [
         "README.md",
-        "deploy/manifest.yaml"
+        "deploy/manifest.yaml",
+        "chart/Chart.yaml",
+        "chart/values.yaml"
       ],
       "changelog-sections": [
         {
