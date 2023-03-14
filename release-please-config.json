@@ -9,7 +9,8 @@
       "pull-request-title-pattern": "chore: release ${version}",
       "draft": false,
       "extra-files": [
-        "README.md"
+        "README.md",
+        "deploy/manifest.yaml"
       ],
       "changelog-sections": [
         {
