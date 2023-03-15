@@ -17,6 +17,7 @@ type PartResponse struct {
 	PartNumber string `json:"partNumber"`
 	Image      string `json:"image"`
 	ServedBy   string `json:"servedBy"`
+	Version    string `json:"version"`
 }
 
 func PartHandler(w http.ResponseWriter, r *http.Request) {
@@ -47,6 +48,7 @@ func PartHandler(w http.ResponseWriter, r *http.Request) {
 		PartNumber: desiredPartNumber,
 		Image:      toBase64(image),
 		ServedBy:   hostname,
+		Version:    version.ServiceVersion(),
 	}
 
 	w.Header().Set("Content-Type", "application/json")
