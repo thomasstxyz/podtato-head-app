@@ -31,19 +31,24 @@ type PodTatoServer struct {
 }
 
 type TemplateData struct {
-	Version         string
-	Hostname        string
-	Daytime         string
-	LeftArm         string
-	LeftArmVersion  string
-	RightArm        string
-	RightArmVersion string
-	LeftLeg         string
-	LeftLegVersion  string
-	RightLeg        string
-	RightLegVersion string
-	Hat             string
-	HatVersion      string
+	Version          string
+	Hostname         string
+	Daytime          string
+	LeftArm          string
+	LeftArmVersion   string
+	LeftArmHostname  string
+	RightArm         string
+	RightArmVersion  string
+	RightArmHostname string
+	LeftLeg          string
+	LeftLegVersion   string
+	LeftLegHostname  string
+	RightLeg         string
+	RightLegVersion  string
+	RightLegHostname string
+	Hat              string
+	HatVersion       string
+	HatHostname      string
 }
 
 func (p PodTatoServer) frontendHandler(w http.ResponseWriter, r *http.Request) {
@@ -58,15 +63,30 @@ func (p PodTatoServer) frontendHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to get hostname: %v", err)
 	}
 
+	leftArmImage, leftArmHost, leftArmVersion := p.fetchImage("left-arm")
+	rightArmImage, rightArmHost, rightArmVersion := p.fetchImage("right-arm")
+	leftLegImage, leftLegHost, leftLegVersion := p.fetchImage("left-leg")
+	rightLegImage, rightLegHost, rightLegVersion := p.fetchImage("right-leg")
+	hatImage, hatHost, hatVersion := p.fetchImage("hat")
 	tpl := TemplateData{
-		LeftArm:  p.fetchImage("left-arm"),
-		RightArm: p.fetchImage("right-arm"),
-		LeftLeg:  p.fetchImage("left-leg"),
-		RightLeg: p.fetchImage("right-leg"),
-		Hat:      p.fetchImage("hat"),
-		Hostname: hostname,
-		Daytime:  getDayTime(),
-		Version:  version.ServiceVersion(),
+		LeftArm:          leftArmImage,
+		RightArm:         rightArmImage,
+		LeftLeg:          leftLegImage,
+		RightLeg:         rightLegImage,
+		Hat:              hatImage,
+		LeftArmHostname:  leftArmHost,
+		RightArmHostname: rightArmHost,
+		LeftLegHostname:  leftLegHost,
+		RightLegHostname: rightLegHost,
+		HatHostname:      hatHost,
+		LeftArmVersion:   leftArmVersion,
+		RightArmVersion:  rightArmVersion,
+		LeftLegVersion:   leftLegVersion,
+		RightLegVersion:  rightLegVersion,
+		HatVersion:       hatVersion,
+		Hostname:         hostname,
+		Daytime:          getDayTime(),
+		Version:          version.ServiceVersion(),
 	}
 
 	err = homeTemplate.Execute(w, tpl)
@@ -149,39 +169,39 @@ func (p PodTatoServer) Serve() error {
 	return nil
 }
 
-func (p PodTatoServer) fetchImage(component string) string {
+func (p PodTatoServer) fetchImage(component string) (string, string, string) {
 	var serviceDiscoverer services.ServiceMap
 	var err error
 	if p.Component == "all" {
 		serviceDiscoverer, err = services.NewLocalServiceDiscoverer(p.Port)
 		if err != nil {
 			log.Printf("failed to get service discoverer: %v", err)
-			return ""
+			return "", "", ""
 
 		}
 	} else {
 		serviceDiscoverer, err = services.ProvideServiceDiscoverer()
 		if err != nil {
 			log.Printf("failed to get service discoverer: %v", err)
-			return ""
+			return "", "", ""
 		}
 	}
 	rootURL, err := serviceDiscoverer.GetServiceAddress(component)
 	if err != nil {
 		log.Printf("failed to discover address for service %s", component)
-		return ""
+		return "", "", ""
 	}
 
 	response, err := http.Get(fmt.Sprintf("%s/images/%s/%s", rootURL, component, component))
 	if err != nil {
 		log.Printf("failed to reach dependency service: %v", err)
-		return ""
+		return "", "", ""
 	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		log.Printf("failed to read body of dependency service response: %v", err)
-		return ""
+		return "", "", ""
 	}
 	defer response.Body.Close()
 
@@ -189,7 +209,7 @@ func (p PodTatoServer) fetchImage(component string) string {
 	err = json.Unmarshal(body, &part)
 	if err != nil {
 		log.Printf("failed to unmarshal body of dependency service response: %v", err)
-		return ""
+		return "", "", ""
 	}
-	return part.Image
+	return part.Image, part.ServedBy, part.Version
 }

@@ -1,25 +1,34 @@
 <html>
   <head>
     <title>Hello Podtato!</title>
-    <link rel="stylesheet" href="./assets/css/styles.css"/>
+    <link rel="stylesheet" href="./assets/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="./assets/css/podtato.css"/>
+    <script src="./assets/js/bootstrap.min.js"></script>
     {{ if eq .Daytime "evening" }}
     <link rel="stylesheet" href="./assets/css/evening.css"/>
     {{ else }}
+    <link rel="stylesheet" href="./assets/css/podtato.css"/>
     <link rel="stylesheet" href="./assets/css/custom.css"/>
     {{ end }}
   </head>
+  <script>
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+  </script>
   <body style="background-color: #849abd;color: #faebd7;">
     <main class="container">
       <div class="text-center">
         <br />
-        <h1>good {{ .Daytime }} from the <i>pod</i>tato head!</h1>
+        <h1 data-toggle="tooltip" title="Some tooltip text!" >good {{ .Daytime }} from the <i>pod</i>tato head!</h1>
         <div style="width:700px; height:800px; margin:auto; position:relative;">
-          <img src="./assets/images/body/body.svg" style="position:absolute;margin-top:80px;margin-left:200px;">
-          <img src="data:image/svg+xml;base64,{{ .Hat }}" style="position:absolute;margin-left:200px;margin-top:0px;">
-          <img src="data:image/svg+xml;base64,{{ .LeftArm }}" style="position:absolute;top:100px;left:-50px;">
-          <img src="data:image/svg+xml;base64,{{ .RightArm }}" style="position:absolute;top:100px;left:450px;">
-          <img src="data:image/svg+xml;base64,{{ .LeftLeg }}" style="position:absolute;top:480px;left: -0px;" >
-          <img src="data:image/svg+xml;base64,{{ .RightLeg }}" style="position:absolute;top:480px;left: 400px;">
+          <img src="./assets/images/body/body.svg" style="position:absolute;margin-top:80px;margin-left:200px;" data-mdb-toggle="tooltip" title="Hi! I'm the frontend served by {{ .Hostname }}, Version: {{ .Version }}">
+          <img src="data:image/svg+xml;base64,{{ .Hat }}" style="position:absolute;margin-left:200px;margin-top:0px;" data-mdb-toggle="tooltip" title="Hi! I'm the hat served by {{ .HatHostname }}, Version: {{ .HatVersion }}">
+          <img src="data:image/svg+xml;base64,{{ .LeftArm }}" style="position:absolute;top:100px;left:-50px;" data-mdb-toggle="tooltip" title="Hi! I'm the left-arm served by {{ .LeftArmHostname }}, Version: {{ .LeftArmVersion }}">
+          <img src="data:image/svg+xml;base64,{{ .RightArm }}" style="position:absolute;top:100px;left:450px;" data-mdb-toggle="tooltip" title="Hi! I'm the right-arm served by {{ .RightArmHostname }}, Version: {{ .RightArmVersion }}">
+          <img src="data:image/svg+xml;base64,{{ .LeftLeg }}" style="position:absolute;top:480px;left: -0px;" data-mdb-toggle="tooltip" title="Hi! I'm the left-leg served by {{ .LeftLegHostname }}, Version: {{ .LeftLegVersion }}">
+          <img src="data:image/svg+xml;base64,{{ .RightLeg }}" style="position:absolute;top:480px;left: 400px;" data-mdb-toggle="tooltip" title="Hi! I'm the left-leg served by {{ .RightLegHostname }}, , Version: {{ .RightLegVersion }}">
         </div>
       </div>
       <table class="center">
