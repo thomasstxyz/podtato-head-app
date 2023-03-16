@@ -11,5 +11,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['podtato-head-frontend:{{ .Values.frontend.servicePort }}']
+      args: ['{{ printf "%s-%s" (include "podtato-head.fullname" .) "frontend" }}:{{ .Values.frontend.servicePort }}']
   restartPolicy: Never
