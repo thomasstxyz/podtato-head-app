@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.3.1](https://github.com/podtato-head/podtato-head-app/compare/v0.3.0...v0.3.1) (2023-03-16)
+
+
+### Features
+
+* add component information to the website ([1cb7f43](https://github.com/podtato-head/podtato-head-app/commit/1cb7f430ef24b6cdc87e7a05e3d0834699f2f96f))
+
+
+### Bug Fixes
+
+* fixed helm test ([c35768e](https://github.com/podtato-head/podtato-head-app/commit/c35768e5be45c93421c3a8ad1a5b0ddc63f8f1c6))
+
+
+### Docs
+
+* fix manifest path in README ([0caf2be](https://github.com/podtato-head/podtato-head-app/commit/0caf2be1c093518fa73b371d94338c6a3e9b7325))
+
 ## [0.3.0](https://github.com/podtato-head/podtato-head-app/compare/v0.3.0...v0.3.0) (2023-03-14)
 
 
