@@ -11,7 +11,7 @@ images:
 
 # keep ports in sync with podtato-services/main/pkg/provider.go
 frontend:
-  tag: "v0.3.0" #x-release-please-version
+  tag: "v0.3.1" #x-release-please-version
   serviceType: ClusterIP
   servicePort: 8080
   replicaCount: 1
