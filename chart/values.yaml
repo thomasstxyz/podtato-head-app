@@ -83,7 +83,7 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
-# applies to podtato-head-entry deployment only
+# applies to podtato-head-frontend deployment only
 ingress:
   enabled: false
   annotations: {}
